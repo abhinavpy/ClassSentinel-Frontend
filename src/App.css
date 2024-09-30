@@ -1,0 +1,33 @@
+/* src/App.css */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f0f2f5;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.background-container {
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 15px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.overlay-paper {
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 15px;
+}
+
+.chat-paper {
+  height: 500px;
+  overflow-y: scroll;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 15px;
+  color: #fff;
+}

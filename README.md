@@ -1,4 +1,23 @@
 # ClassSentinel - Frontend
+
+Instructions to run the frontend of this application:
+
+Open Terminal (Mac/Linux) or Git Bash (on Windows)
+Clone the project:
+`git clone https://github.com/abhinavpy/ClassSentinel-Frontend.git`
+
+Get inside the folder
+`cd ClassSentinel-frontend`
+
+Install node dependencies
+`npm install`
+`npm build run`
+
+Run the app
+`npm start`
+
+View on localhost:3000 on your default browser.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

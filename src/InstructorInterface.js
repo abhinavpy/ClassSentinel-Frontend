@@ -1,5 +1,5 @@
 // src/InstructorInterface.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   TextField,
   Button,
@@ -9,10 +9,34 @@ import {
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import config from './config'; // Import the backend URL
+// Import CircularProgress at the top of your file
+import { CircularProgress } from '@mui/material';
+
 
 function InstructorInterface() {
   const [guardrails, setGuardrails] = useState('');
   const [file, setFile] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentGuardrails, setCurrentGuardrails] = useState('');
+
+  useEffect(() => {
+    const fetchGuardrails = async () => {
+      try {
+        const response = await fetch(`${config.backendUrl}/guardrails`);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        setCurrentGuardrails(data.guardrails);
+      } catch (error) {
+        console.error('Error fetching guardrails:', error);
+      }
+    };
+  
+    fetchGuardrails();
+  }, []);
+  
+
 
   const handleGuardrailsSubmit = async (e) => {
     e.preventDefault();
@@ -30,11 +54,40 @@ function InstructorInterface() {
   
       const data = await response.json();
       alert(data.message);
+
+      // Update current guardrails
+      setCurrentGuardrails(guardrails);
     } catch (error) {
       console.error('Error:', error);
       alert('An error occurred while saving guardrails.');
     }
   };  
+
+  const handleClearGuardrails = async () => {
+    // Send request to backend to clear guardrails
+    try {
+      const response = await fetch(`${config.backendUrl}/guardrails/clear`, {
+        method: 'POST',
+      });
+  
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+  
+      const data = await response.json();
+      alert(data.message);
+  
+      // Update current guardrails
+      setCurrentGuardrails('');
+  
+      // Optionally, clear the input field
+      setGuardrails('');
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred while clearing guardrails.');
+    }
+  };
+  
 
   const handleFileUpload = async (e) => {
     e.preventDefault();
@@ -44,6 +97,7 @@ function InstructorInterface() {
     formData.append('file', file);
   
     try {
+      setIsLoading(true);
       const response = await fetch(`${config.backendUrl}/upload`, {
         method: 'POST',
         body: formData,
@@ -58,6 +112,9 @@ function InstructorInterface() {
     } catch (error) {
       console.error('Error:', error);
       alert('An error occurred while uploading the file.');
+    } finally {
+      // Set loading to false when upload completes or fails
+      setIsLoading(false);
     }
   };  
 
@@ -100,6 +157,15 @@ function InstructorInterface() {
           >
             Save Guardrails
           </Button>
+          <br />
+          <br />
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={handleClearGuardrails}
+          >
+            Clear Guardrails
+          </Button>
         </form>
       </Paper>
 
@@ -124,16 +190,37 @@ function InstructorInterface() {
           </Button>
           {file && <Typography variant="body1">{file.name}</Typography>}
           <br />
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            sx={{ marginTop: '10px' }}
-          >
-            Upload File
-          </Button>
+          {isLoading ? (
+            <CircularProgress sx={{ marginTop: '10px' }} />
+          ) : (
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              sx={{ marginTop: '10px' }}
+            >
+              Upload File
+            </Button>
+          )}
         </form>
       </Paper>
+
+      <Paper
+        sx={{
+          padding: '20px',
+          marginTop: '20px',
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        }}
+        elevation={3}
+      >
+        <Typography variant="h6" gutterBottom>
+          Current Guardrails
+        </Typography>
+        <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
+          {currentGuardrails || 'No guardrails have been set yet.'}
+        </Typography>
+      </Paper>
+
     </Container>
   );
 }

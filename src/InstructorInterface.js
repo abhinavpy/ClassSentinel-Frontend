@@ -18,6 +18,8 @@ function InstructorInterface() {
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [currentGuardrails, setCurrentGuardrails] = useState('');
+  const [documents, setDocuments] = useState([]);
+
 
   useEffect(() => {
     const fetchGuardrails = async () => {
@@ -32,11 +34,46 @@ function InstructorInterface() {
         console.error('Error fetching guardrails:', error);
       }
     };
+    
+    const fetchDocuments = async () => {
+      try {
+        const response = await fetch(`${config.backendUrl}/documents`);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        setDocuments(data.documents);
+      } catch (error) {
+        console.error('Error fetching documents:', error);
+      }
+    };
   
     fetchGuardrails();
+    fetchDocuments();
   }, []);
   
-
+  const handleDeleteDocument = async (documentId) => {
+    if (!window.confirm('Are you sure you want to delete this document?')) {
+      return;
+    }
+    try {
+      const response = await fetch(`${config.backendUrl}/documents/${documentId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      alert(data.message);
+  
+      // Update the documents list
+      setDocuments(documents.filter((doc) => doc.id !== documentId));
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      alert('An error occurred while deleting the document.');
+    }
+  };
+  
 
   const handleGuardrailsSubmit = async (e) => {
     e.preventDefault();
@@ -109,6 +146,14 @@ function InstructorInterface() {
   
       const data = await response.json();
       alert(data.message);
+
+      // Inside the try block after alert(data.message);
+      const newDocument = {
+        id: data.document_id, // Ensure the backend returns document_id
+        filename: file.name,
+      };
+      setDocuments([...documents, newDocument]);
+
     } catch (error) {
       console.error('Error:', error);
       alert('An error occurred while uploading the file.');
@@ -220,6 +265,46 @@ function InstructorInterface() {
           {currentGuardrails || 'No guardrails have been set yet.'}
         </Typography>
       </Paper>
+
+      <Paper
+        sx={{
+          padding: '20px',
+          marginTop: '20px',
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        }}
+        elevation={3}
+      >
+        <Typography variant="h6" gutterBottom>
+          Uploaded Documents
+        </Typography>
+        {documents.length > 0 ? (
+          documents.map((doc) => (
+            <Paper
+              key={doc.id}
+              sx={{
+                padding: '10px',
+                marginBottom: '10px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+              elevation={2}
+            >
+              <Typography variant="body1">{doc.filename}</Typography>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={() => handleDeleteDocument(doc.id)}
+              >
+                Delete
+              </Button>
+            </Paper>
+          ))
+        ) : (
+          <Typography variant="body1">No documents have been uploaded yet.</Typography>
+        )}
+      </Paper>
+
 
     </Container>
   );

@@ -1,12 +1,17 @@
 // src/ChatMessage.js
 import React from 'react';
 import { Box, Paper, Typography, Avatar } from '@mui/material';
+import ReactMarkdown from 'react-markdown'; // Import ReactMarkdown
+import remarkGfm from 'remark-gfm'; // For GitHub Flavored Markdown
+import rehypeSanitize from 'rehype-sanitize'; // For sanitizing HTML
 
+
+// src/ChatMessage.js
 function ChatMessage({ sender, text }) {
   const isUser = sender === 'student';
   const avatarSrc = isUser
-    ? process.env.PUBLIC_URL + '/images/student-avatar.png' // Path to student's avatar
-    : process.env.PUBLIC_URL + '/images/assistant-avatar.png'; // Path to assistant's avatar
+    ? process.env.PUBLIC_URL + '/images/student-avatar.png'
+    : process.env.PUBLIC_URL + '/images/assistant-avatar.png';
 
   return (
     <Box
@@ -31,7 +36,13 @@ function ChatMessage({ sender, text }) {
           borderRadius: '15px',
         }}
       >
-        <Typography variant="body1">{text}</Typography>
+        {/* Replace Typography with ReactMarkdown */}
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeSanitize]}
+        >
+          {text}
+        </ReactMarkdown>
       </Paper>
       {isUser && (
         <Avatar

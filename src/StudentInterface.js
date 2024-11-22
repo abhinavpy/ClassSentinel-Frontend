@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import ChatMessage from './ChatMessage';
+import config from './config'; // Import the backend URL
 
 function StudentInterface() {
   const [messages, setMessages] = useState([]);
@@ -17,27 +18,33 @@ function StudentInterface() {
 
   const sendMessage = async () => {
     if (input.trim() === '') return;
-
+  
     const userMessage = { sender: 'student', text: input };
     setMessages([...messages, userMessage]);
     setInput('');
-
+  
     // Send message to backend
     try {
-      const response = await fetch('http://localhost:8000/chat', {
+      const response = await fetch(`${config.backendUrl}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: input }),
       });
+  
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+  
       const data = await response.json();
-      const botMessage = { sender: 'assistant', text: data.reply };
+      console.log(data);
+      const botMessage = { sender: 'assistant', text: data.reply.content };
       setMessages((msgs) => [...msgs, botMessage]);
     } catch (error) {
       console.error('Error:', error);
       const errorMessage = { sender: 'assistant', text: 'Sorry, an error occurred.' };
       setMessages((msgs) => [...msgs, errorMessage]);
     }
-  };
+  };  
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {

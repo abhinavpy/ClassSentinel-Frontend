@@ -8,6 +8,7 @@ import {
   Paper,
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
+import config from './config'; // Import the backend URL
 
 function InstructorInterface() {
   const [guardrails, setGuardrails] = useState('');
@@ -17,36 +18,48 @@ function InstructorInterface() {
     e.preventDefault();
     // Send guardrails to backend
     try {
-      const response = await fetch('http://localhost:8000/guardrails', {
+      const response = await fetch(`${config.backendUrl}/guardrails`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ settings: guardrails }),
       });
+  
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+  
       const data = await response.json();
       alert(data.message);
     } catch (error) {
       console.error('Error:', error);
+      alert('An error occurred while saving guardrails.');
     }
-  };
+  };  
 
   const handleFileUpload = async (e) => {
     e.preventDefault();
     if (!file) return;
-
+  
     const formData = new FormData();
     formData.append('file', file);
-
+  
     try {
-      const response = await fetch('http://localhost:8000/upload', {
+      const response = await fetch(`${config.backendUrl}/upload`, {
         method: 'POST',
         body: formData,
       });
+  
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+  
       const data = await response.json();
       alert(data.message);
     } catch (error) {
       console.error('Error:', error);
+      alert('An error occurred while uploading the file.');
     }
-  };
+  };  
 
   return (
     <Container
